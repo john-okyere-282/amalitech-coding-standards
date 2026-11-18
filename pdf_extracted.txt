@@ -1,0 +1,1268 @@
+﻿Pages: 33
+--- PAGE 1 ---
+A M A L I T E C H
+AmaliTech Coding Standards
+Java Edition ┬╖ 2026 ┬╖ based on the AmaliTech Coding Standards (2022)
+Status: draft for sign-off. Prepared October 2026.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 1
+
+--- PAGE 2 ---
+Contents
+About this edition...................................................................................................................................... 3
+1. Introduction............................................................................................................................................4
+2. General Overview.................................................................................................................................5
+2.1. Definition of clean code....................................................................................................................5
+2.2. General principles............................................................................................................................5
+3. Naming Conventions...........................................................................................................................6
+3.1. Choose names that are descriptive and unambiguous....................................................................6
+3.2. Make meaningful distinctions and avoid misinformation..................................................................6
+3.3. Use pronounceable names..............................................................................................................6
+3.4. Use searchable names: replace magic numbers with named constants.........................................6
+3.5. Avoid encodings and noise words...................................................................................................7
+4. Functions................................................................................................................................................8
+4.1. Functions should be small...............................................................................................................8
+4.2. A function should do one thing.........................................................................................................9
+4.3. A function should have few arguments..........................................................................................10
+4.4. A function should have no side effects..........................................................................................10
+4.5. Avoid flag arguments..................................................................................................................... 11
+5. Concurrency........................................................................................................................................12
+5.1. Use an executor, not raw threads..................................................................................................12
+5.2. Compose asynchronous work, and do not lose its failures............................................................12
+5.3. Share as little mutable state as possible........................................................................................13
+6. Error Handling..................................................................................................................................... 14
+6.1. Do not ignore caught exceptions...................................................................................................14
+6.2. Do not ignore failed asynchronous work........................................................................................15
+6.3. Add context when you rethrow.......................................................................................................15
+7. Formatting............................................................................................................................................ 17
+7.1. Vertical formatting..........................................................................................................................17
+7.2. Vertical openness between concepts............................................................................................17
+7.3. Closely related lines should be vertically dense............................................................................17
+7.4. Vertical distance.............................................................................................................................18
+7.5. Instance variables..........................................................................................................................18
+7.6. Dependent functions......................................................................................................................18
+7.7. Horizontal openness and density...................................................................................................19
+7.8. Indentation.....................................................................................................................................19
+8. Objects and Data Structures............................................................................................................21
+9. Test-Driven Development.................................................................................................................22
+10. Commenting.......................................................................................................................................24
+10.1. Only comment things that have business logic complexity..........................................................24
+10.2. Do not keep journal comments or commented-out code.............................................................24
+10.3. Avoid positional markers..............................................................................................................25
+11. Source Code Structure....................................................................................................................26
+11.1. Java source files.......................................................................................................................... 26
+12. The SOLID Principles......................................................................................................................28
+12.1. Single-responsibility principle (SRP)............................................................................................28
+12.2. Open-closed principle (OCP).......................................................................................................29
+12.3. Liskov substitution principle (LSP)...............................................................................................29
+12.4. Interface segregation principle (ISP)............................................................................................30
+12.5. Dependency inversion principle (DIP)..........................................................................................31
+13. Team Responsibility........................................................................................................................32
+14. Conclusion......................................................................................................................................... 33
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 2
+
+--- PAGE 3 ---
+About this edition
+This edition restates the AmaliTech Coding Standards (2022) for Java. The rules, the section 
+numbering and the order are unchanged, so a reference such as "┬º4.5" means the same rule in 
+both editions. What has changed:
+ΓÇó Every example is now Java (Java 21). The 2022 edition used JavaScript for most examples.
+ΓÇó Inconsistencies in the 2022 examples are fixed: Java keywords and types are correctly 
+capitalised, and field names no longer carry the m_ prefix that ┬º3.5 rules out.
+ΓÇó ┬º5 Concurrency is rewritten for Java. The 2022 section described JavaScript promises and 
+async/await.
+ΓÇó ┬º6 Error handling: the "good" examples now handle, rethrow or propagate a failure. Logging 
+an error and carrying on is shown as a bad example, because the program then continues as if 
+nothing happened.
+ΓÇó ┬º9 Test-driven development keeps the 100% coverage target and adds a note that coverage 
+must come with assertions that would fail if the code were wrong.
+ΓÇó ┬º11 Source code structure adds the Java-specific rules the 2022 edition did not cover 
+(packages, imports, braces, line length) by adopting the Google Java Style Guide for them.
+To keep the examples short, they omit imports, and some omit fields and collaborators (repositories, 
+mailers and the like) that are not relevant to the rule being shown.
+Status: draft for sign-off: Points marked "Changed in this edition" go beyond translating the 
+examples and need sign-off by the standard's owner.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 3
+
+--- PAGE 4 ---
+1. Introduction
+"Are we debugging in a panic, poring over code that we thought worked? Are customers leaving in 
+droves and managers breathing down our necks? How can we make sure we wind up behind the 
+right door when the going gets tough? The answer is: craftsmanship." (Robert C. Martin)
+At AmaliTech Services we provide IT and digital solutions for multinational clients. Our goal is to 
+help companies concentrate on their core business and accelerate their time to market. Providing 
+clients with robust, efficient and maintainable software is central to that, so writing clean, 
+understandable and maintainable code is a skill every AmaliTech software engineer must master.
+This handbook sets out our organisational rules, techniques and practices for writing code that is 
+clean, readable, reusable, easy to refactor and efficient, with few or no errors. It gives our engineers 
+a uniform format for building sophisticated, highly functional software.
+All code examples in this edition are in Java.
+Each project team, working within this standard, agrees its own procedures and rules, including 
+naming definitions for the structure of source code, variables, classes and other elements. These 
+must be consistent throughout the project, documented in the project's technical specification, and 
+available to every member of the team. This makes onboarding easier and keeps approved 
+procedures consistent across the project.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 4
+
+--- PAGE 5 ---
+2. General Overview
+2.1. Definition of clean code
+Code is clean if it can be understood easily by everyone on the team. Clean code can be read and 
+enhanced by a developer other than its original author.
+Clean code does not rely on language-specific rules. It relies on language-agnostic principles 
+agreed by the developer community.
+2.2. General principles
+At AmaliTech, our teams are guided by the following principles:
+ΓÇó KISS: keep it simple. Avoid unnecessary complexity. Ask: "can this be written in a simpler 
+way?"
+ΓÇó DRY: do not repeat yourself. Every piece of knowledge must have a single, unambiguous, 
+authoritative representation in the codebase.
+ΓÇó YAGNI: you are not going to need it. Do not add functionality until it is needed.
+ΓÇó Composition over inheritance: design types around what they do, not what they are. Prefer 
+holding a collaborator to extending a class.
+ΓÇó Favour readability: a machine can read your code; make sure a person can too. When working 
+with others, prefer readability over conciseness.
+ΓÇó Practise consistency: if you decide to do something a certain way, do it that way throughout 
+the project. If you must depart from the choice, explain why in a comment.
+Beyond these general principles, the rest of this handbook sets out the rules for: names; functions; 
+concurrency; error handling; formatting; objects and data structures; test-driven development; 
+comments; source code structure; and the SOLID principles.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 5
+
+--- PAGE 6 ---
+3. Naming Conventions
+A naming convention is the agreed scheme for naming identifiers. AmaliTech engineers must follow 
+the guidelines below.
+3.1. Choose names that are descriptive and unambiguous
+Do not use a comment to explain what a variable is for. If a name needs a comment, take the time 
+to name it properly. Well-chosen names make it much easier for colleagues to understand what the 
+system does and how to change it.
+B A D
+String d = "Monday"; // first day
+Using comments to disguise unclear names is a common mistake. At AmaliTech, single letters such 
+as x, y, a or b are not used as variable names unless there is a solid reason (see the loop-counter 
+exception in the table in ┬º3.5).
+G O O D
+String firstDayOfWeek = "Monday";
+3.2. Make meaningful distinctions and avoid misinformation
+Be careful with words that have a definite meaning. Do not call a group of accounts accountList 
+unless it really is a List; the word suggests a type and can mislead. Even when it is a List, the plural 
+is simpler.
+B A D
+List<User> userList = new ArrayList<>();
+Set<User> userList2 = new HashSet<>();
+G O O D
+List<User> users = new ArrayList<>();
+Set<User> activeUsers = new HashSet<>();
+3.3. Use pronounceable names
+If you cannot pronounce a name, you cannot discuss it without sounding silly.
+B A D
+LocalDate genymdhms = LocalDate.now();
+G O O D
+LocalDate generationDate = LocalDate.now();
+3.4. Use searchable names: replace magic numbers with named constants
+Avoid magic numbers. Use searchable, named constants instead. Do not use single-letter names 
+for constants: they cannot be found in a search.
+B A D
+class SessionTimer {
+    boolean hasExpired(long idleMillis) {
+        return idleMillis > 1_800_000; // what is 1800000?
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 6
+
+--- PAGE 7 ---
+G O O D
+class SessionTimer {
+    private static final Duration SESSION_TIMEOUT = Duration.ofMinutes(30);
+ 
+    boolean hasExpired(Duration idleTime) {
+        return idleTime.compareTo(SESSION_TIMEOUT) > 0;
+    }
+}
+SESSION_TIMEOUT can be used wherever it is needed, and if the timeout changes it changes in 
+one place. The bad example leaves the reader asking what 1800000 means.
+3.5. Avoid encodings and noise words
+Noise words add no information to a name and should be removed. Common noise words are: a 
+"The" prefix, Info, Data, Variable, Object and Manager. A class called UserInfo is just User.
+Do not encode the type or scope in a name: no Hungarian notation (strName, iCount) and no 
+member prefixes (m_name, _name). Modern IDEs show the type and scope.
+B A D
+class UserInfo {
+    private String m_strName;
+    private int m_iAge;
+}
+G O O D
+class User {
+    private String name;
+    private int age;
+}
+Note: One word per concept. Within a project, do not use fetch, retrieve and get for the same kind of 
+operation in different classes. Choose one and use it everywhere, so the people who maintain the 
+code, and the clients of your API, can find the method they need.
+In addition to these principles, AmaliTech engineers follow the identifier rules below. A project team 
+may agree additional naming rules for a project, provided they are consistent with these principles 
+and applied consistently throughout the project.
+Identifier type Rules for naming Examples
+Packages All lower case, no underscores, starting with the reversed 
+company domain. Consecutive words are simply joined.
+com.amalitech.booking
+com.amalitech.booking.seating
+Classes and interfaces Nouns or noun phrases in UpperCamelCase. Use whole 
+words; avoid acronyms and abbreviations unless the 
+abbreviation is far more widely used than the long form 
+(Url, Html). Treat acronyms as words: HttpClient, not 
+HTTPClient.
+class Invoice
+class SeatMap
+interface PaymentGateway
+Methods Verbs or verb phrases in lowerCamelCase. reserve()
+calculateTotal()
+isAvailable()
+Variables and 
+parameters
+lowerCamelCase. Never start with an underscore or a 
+dollar sign. Short but meaningful: the name should tell a 
+casual reader what the variable is for. Single-letter names 
+only for throwaway loop counters (i, j, k) and lambda 
+parameters with an obvious meaning.
+int seatCount;
+double screenWidth;
+for (int i = 0; i < rows; i+
++)
+Constants (static final, 
+deeply immutable)
+UPPER_SNAKE_CASE. Digits are allowed, but not as the 
+first character.
+static final int 
+MAX_PARTICIPANTS = 10;
+Type parameters A single capital letter, optionally followed by a digit. T, E, K, V, T2
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 7
+
+--- PAGE 8 ---
+4. Functions
+In Java, functions are methods. AmaliTech engineers follow these principles when writing them.
+4.1. Functions should be small
+Methods should be small, and rarely longer than 20 lines. The longer a method grows, the more 
+likely it is to do several things and to have side effects.
+B A D
+class PasswordService {
+    void changePassword(String email, String oldPassword, String newPassword) {
+        User user = users.findByEmail(email);
+        if (user == null || !hasher.matches(oldPassword, user.passwordHash())) {
+            throw new InvalidCredentialsException(email);
+        }
+        if (hasher.matches(newPassword, user.passwordHash())) {
+            throw new PasswordReusedException(email);
+        }
+        if (user.isAdmin()) {
+            user.setPasswordHash(hasher.hash(newPassword));
+            users.save(user);
+            sessions.endAllFor(user);
+            String token = tokens.createRevertToken(user);
+            for (String address : user.emailAddresses()) {
+                mailer.send(address, "Your password was changed", token);
+            }
+        } else {
+            if (!user.isEnabled()) {
+                throw new AccountDisabledException(email);
+            }
+            user.setPasswordHash(hasher.hash(newPassword));
+            users.save(user);
+            sessions.endAllFor(user);
+        }
+    }
+}
+If a method is long, refactor it into smaller methods. A method that does one thing is naturally small.
+G O O D
+class PasswordService {
+    void changePassword(String email, String oldPassword, String newPassword) {
+        User user = users.findByEmail(email);
+        checkPasswordCanChange(user, email, oldPassword, newPassword);
+        if (user.isAdmin()) {
+            changeAdminPassword(user, newPassword);
+        } else {
+            changeUserPassword(user, newPassword);
+        }
+    }
+ 
+    private void checkPasswordCanChange(User user, String email,
+                                        String oldPassword, String newPassword) {
+        if (user == null || !hasher.matches(oldPassword, user.passwordHash())) {
+            throw new InvalidCredentialsException(email);
+        }
+        if (hasher.matches(newPassword, user.passwordHash())) {
+            throw new PasswordReusedException(email);
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 8
+
+--- PAGE 9 ---
+        }
+    }
+ 
+    private void changeUserPassword(User user, String newPassword) {
+        if (!user.isEnabled()) {
+            throw new AccountDisabledException(user.email());
+        }
+        storeNewPassword(user, newPassword);
+    }
+ 
+    private void changeAdminPassword(User user, String newPassword) {
+        storeNewPassword(user, newPassword);
+        sendPasswordChangedEmails(user);
+    }
+ 
+    private void storeNewPassword(User user, String newPassword) {
+        user.setPasswordHash(hasher.hash(newPassword));
+        users.save(user);
+        sessions.endAllFor(user);
+    }
+ 
+    private void sendPasswordChangedEmails(User user) {
+        String token = tokens.createRevertToken(user);
+        for (String address : user.emailAddresses()) {
+            mailer.send(address, "Your password was changed", token);
+        }
+    }
+}
+4.2. A function should do one thing
+A method should do one thing, and its name should say what that thing is. If you follow this rule, 
+your methods will be small.
+B A D
+class NewsletterService {
+    void emailSubscribers(List<Subscriber> subscribers) {
+        for (Subscriber subscriber : subscribers) {
+            SubscriberRecord subscriberRecord = database.lookup(subscriber);
+            if (subscriberRecord.isActive()) {
+                mailer.send(subscriber);
+            }
+        }
+    }
+}
+G O O D
+class NewsletterService {
+    void emailActiveSubscribers(List<Subscriber> subscribers) {
+        subscribers.stream()
+                .filter(this::isActive)
+                .forEach(mailer::send);
+    }
+ 
+    private boolean isActive(Subscriber subscriber) {
+        return database.lookup(subscriber).isActive();
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 9
+
+--- PAGE 10 ---
+4.3. A function should have few arguments
+Keep the number of parameters small. Fewer parameters make a method easier to understand and 
+to test: with more than three, the combinations to test multiply quickly. One or two parameters is 
+ideal; avoid three or more where you can, for example by grouping related values into a record.
+B A D
+class DialogFactory {
+    Dialog createDialog(String title, String body, String buttonText, boolean cancellable) {
+        return new Dialog(title, body, buttonText, cancellable);
+    }
+}
+G O O D
+record DialogSpec(String title, String body, String buttonText, boolean cancellable) {}
+ 
+class DialogFactory {
+    Dialog createDialog(DialogSpec spec) {
+        return new Dialog(spec.title(), spec.body(), spec.buttonText(), spec.cancellable());
+    }
+}
+4.4. A function should have no side effects
+A method has a side effect if it does anything other than take values in and return a value: changing 
+state elsewhere, writing to a file, starting a session. Hidden side effects make code surprising and 
+hard to test.
+B A D
+class UserValidator {
+    private final Cryptographer cryptographer;
+    private final UserGateway userGateway;
+ 
+    UserValidator(Cryptographer cryptographer, UserGateway userGateway) {
+        this.cryptographer = cryptographer;
+        this.userGateway = userGateway;
+    }
+ 
+    boolean checkPassword(String userName, String password) {
+        User user = userGateway.findByName(userName);
+        if (user != null) {
+            String phrase = cryptographer.decrypt(user.encodedPhrase(), password);
+            if ("Valid Password".equals(phrase)) {
+                Session.initialize();
+                return true;
+            }
+        }
+        return false;
+    }
+}
+The method claims to check a password, but when the password is valid it also initialises a session. 
+Renaming it checkPasswordAndInitializeSession would make the effect visible, but then the name 
+shows that the method does two things. Keep checking and session start-up in separate methods, 
+and let the caller decide.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 10
+
+--- PAGE 11 ---
+4.5. Avoid flag arguments
+A flag argument is a boolean parameter that makes a method do one of two different things. It 
+contradicts the single-responsibility principle: split the method into two that the caller can choose 
+between.
+B A D
+class ReportWriter {
+    Path createFile(String name, boolean temporary) throws IOException {
+        if (temporary) {
+            return Files.createFile(Path.of("temp", name));
+        }
+        return Files.createFile(Path.of(name));
+    }
+}
+G O O D
+class ReportWriter {
+    Path createFile(String name) throws IOException {
+        return Files.createFile(Path.of(name));
+    }
+ 
+    Path createTemporaryFile(String name) throws IOException {
+        return createFile(Path.of("temp", name).toString());
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 11
+
+--- PAGE 12 ---
+5. Concurrency
+Concurrency is one of the hardest areas of software to get right. Changed in this edition: the 2022 
+section covered JavaScript promises; the guidance below is for Java.
+5.1. Use an executor, not raw threads
+Creating threads by hand gives you no limit on how many run and no clean way to stop them. 
+Submit tasks to an ExecutorService, and close it when you are done. On Java 21, virtual threads 
+make an executor per task cheap for work that waits on I/O.
+B A D
+class ThumbnailJob {
+    void process(List<Path> images) {
+        for (Path image : images) {
+            new Thread(() -> Thumbnails.create(image)).start();
+        }
+    }
+}
+G O O D
+class ThumbnailJob {
+    void process(List<Path> images) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            images.forEach(image -> executor.submit(() -> Thumbnails.create(image)));
+        }
+    }
+}
+5.2. Compose asynchronous work, and do not lose its failures
+When steps depend on each other, compose them with CompletableFuture rather than nesting 
+callbacks, and always say what happens when a step fails.
+B A D
+class ArticleArchiver {
+    void archive(URI articleUri, Path target) {
+        CompletableFuture.supplyAsync(() -> http.download(articleUri))
+                .thenAccept(body -> files.write(target, body));
+    }
+}
+G O O D
+class ArticleArchiver {
+    CompletableFuture<Void> archive(URI articleUri, Path target) {
+        return CompletableFuture.supplyAsync(() -> http.download(articleUri))
+                .thenAccept(body -> files.write(target, body))
+                .exceptionally(failure -> {
+                    alerts.report("Could not archive " + articleUri, failure);
+                    throw new CompletionException(failure);
+                });
+    }
+}
+The bad example returns nothing, so the caller cannot wait for the result, and a failed download 
+disappears. The good example returns the future, reports the failure and keeps it failed, so the caller 
+can react.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 12
+
+--- PAGE 13 ---
+5.3. Share as little mutable state as possible
+Most concurrency bugs come from two threads changing the same object. Prefer immutable objects 
+(records, final fields) for data passed between threads. When state must be shared, use the 
+java.util.concurrent types (ConcurrentHashMap, AtomicInteger) rather than writing your own locking.
+B A D
+class VisitCounter {
+    private int visits;
+ 
+    void recordVisit() {
+        visits++; // not atomic: two threads can lose an update
+    }
+}
+G O O D
+class VisitCounter {
+    private final AtomicInteger visits = new AtomicInteger();
+ 
+    void recordVisit() {
+        visits.incrementAndGet();
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 13
+
+--- PAGE 14 ---
+6. Error Handling
+Thrown exceptions are a good thing. They tell you the runtime has detected that something went 
+wrong, stop the current operation, and carry a stack trace that shows where.
+6.1. Do not ignore caught exceptions
+Doing nothing with a caught exception means you can never fix or react to the failure. Logging it and 
+carrying on is not much better: the log line is easily lost, and the program continues as if the 
+operation had succeeded. Changed in this edition: the 2022 "good" example logged the error and 
+continued.
+B A D
+class TicketService {
+    void cancel(String bookingId) {
+        try {
+            bookings.cancel(bookingId);
+        } catch (BookingException e) {
+            // ignore
+        }
+    }
+}
+B A D
+class TicketService {
+    void cancel(String bookingId) {
+        try {
+            bookings.cancel(bookingId);
+        } catch (BookingException e) {
+            log.error("Cancel failed", e); // and the caller thinks it worked
+        }
+    }
+}
+Catch an exception only where you can do something useful with it. Otherwise, let it travel to a level 
+that can.
+G O O D
+class TicketService {
+    void cancel(String bookingId) {
+        try {
+            bookings.cancel(bookingId);
+        } catch (BookingException e) {
+            throw new CancellationFailedException(
+                    "Could not cancel booking " + bookingId, e);
+        }
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 14
+
+--- PAGE 15 ---
+G O O D
+class TicketService {
+    CancellationResult cancel(String bookingId) {
+        try {
+            bookings.cancel(bookingId);
+            return CancellationResult.cancelled(bookingId);
+        } catch (BookingAlreadyUsedException e) {
+            return CancellationResult.refused(bookingId, "Ticket already used");
+        }
+    }
+}
+The first good example adds context and keeps the original cause. The second turns one specific, 
+expected failure into a result the caller must deal with; any other exception still travels upwards.
+6.2. Do not ignore failed asynchronous work
+A failure inside a CompletableFuture is only seen if someone looks for it. Return the future to the 
+caller, or handle the failure explicitly, as in ┬º5.2.
+B A D
+class WeatherFeed {
+    void refresh() {
+        CompletableFuture.runAsync(this::download)
+                .exceptionally(failure -> null);
+    }
+}
+G O O D
+class WeatherFeed {
+    CompletableFuture<Void> refresh() {
+        return CompletableFuture.runAsync(this::download)
+                .whenComplete((ignored, failure) -> {
+                    if (failure != null) {
+                        alerts.report("Weather refresh failed", failure);
+                    }
+                });
+    }
+}
+6.3. Add context when you rethrow
+When you wrap an exception, keep the original as the cause and add what you were trying to do. 
+Never throw away the original exception, and never replace a specific exception with a generic 
+RuntimeException("Error").
+B A D
+class ScheduleLoader {
+    Schedule load(Path file) {
+        try {
+            return parser.parse(Files.readString(file));
+        } catch (IOException e) {
+            throw new RuntimeException("Error");
+        }
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 15
+
+--- PAGE 16 ---
+G O O D
+class ScheduleLoader {
+    Schedule load(Path file) {
+        try {
+            return parser.parse(Files.readString(file));
+        } catch (IOException e) {
+            throw new ScheduleLoadException("Could not read schedule from " + file, e);
+        }
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 16
+
+--- PAGE 17 ---
+7. Formatting
+Formatting matters. Communication is the first job of a professional developer, and formatting is 
+communication. AmaliTech developers are required to follow these formatting principles.
+7.1. Vertical formatting
+A source file should read like a newspaper article. Its name should be simple but tell you whether 
+you are in the right place. The top of the file gives the high-level concepts; detail increases as you 
+read down, until the lowest-level methods at the bottom.
+7.2. Vertical openness between concepts
+Code is read left to right and top to bottom. Each line is an expression or a statement, and each 
+group of lines is a complete thought. Separate those thoughts with blank lines.
+G O O D
+package com.amalitech.cinema.pricing;
+ 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+ 
+public class TicketPricer {
+ 
+    private static final BigDecimal WEEKEND_SURCHARGE = new BigDecimal("10.00");
+ 
+    private final BigDecimal basePrice;
+ 
+    public TicketPricer(BigDecimal basePrice) {
+        this.basePrice = basePrice;
+    }
+ 
+    public BigDecimal priceFor(DayOfWeek day) {
+        return isWeekend(day) ? basePrice.add(WEEKEND_SURCHARGE) : basePrice;
+    }
+ 
+    private boolean isWeekend(DayOfWeek day) {
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
+    }
+}
+7.3. Closely related lines should be vertically dense
+Lines that belong together should sit together. Comments that add nothing break the association.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 17
+
+--- PAGE 18 ---
+B A D
+class ReporterConfig {
+    /**
+     * The class name of the reporter listener
+     */
+    private String className;
+ 
+    /**
+     * The properties of the reporter listener
+     */
+    private List<Property> properties = new ArrayList<>();
+ 
+    void addProperty(Property property) {
+        properties.add(property);
+    }
+}
+G O O D
+class ReporterConfig {
+    private String className;
+    private List<Property> properties = new ArrayList<>();
+ 
+    void addProperty(Property property) {
+        properties.add(property);
+    }
+}
+7.4. Vertical distance
+Concepts that are closely related should be kept vertically close. Closely related concepts should 
+not be split across files without a very good reason. Declare loop control variables in the loop 
+statement, and local variables as close as possible to their first use.
+7.5. Instance variables
+Following Robert C. Martin, AmaliTech declares instance variables at the top of the class. The point 
+is that everyone knows where to find them.
+7.6. Dependent functions
+If one method calls another, keep them vertically close, with the caller above the callee where 
+possible. The program then reads naturally from top to bottom, and readers can trust that a 
+method's definition follows shortly after its first use.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 18
+
+--- PAGE 19 ---
+G O O D
+class PageResponder {
+    private final PageStore pageStore;
+ 
+    PageResponder(PageStore pageStore) {
+        this.pageStore = pageStore;
+    }
+ 
+    Response respond(Request request) {
+        String pageName = pageNameOrDefault(request, "FrontPage");
+        Page page = pageStore.find(pageName);
+        return page == null ? notFound(pageName) : render(page);
+    }
+ 
+    private String pageNameOrDefault(Request request, String defaultName) {
+        String name = request.resource();
+        return name == null || name.isBlank() ? defaultName : name;
+    }
+ 
+    private Response notFound(String pageName) {
+        return Response.notFound("No page called " + pageName);
+    }
+ 
+    private Response render(Page page) {
+        return Response.ok(page.toHtml());
+    }
+}
+7.7. Horizontal openness and density
+AmaliTech uses horizontal white space to associate things that are strongly related and to separate 
+things that are more weakly related.
+E X A M P L E
+class LineStatistics {
+    private int lineCount;
+    private int totalChars;
+    private int widestLine;
+ 
+    void measureLine(String line) {
+        lineCount++;
+        int lineSize = line.length();
+        totalChars += lineSize;
+        recordWidestLine(lineSize);
+    }
+ 
+    private void recordWidestLine(int lineSize) {
+        widestLine = Math.max(widestLine, lineSize);
+    }
+}
+Assignment operators are surrounded by spaces to emphasise their two sides. There is no space 
+between a method name and its opening parenthesis, because the method and its arguments 
+belong together. Arguments are separated by a comma and a space to show they are separate.
+7.8. Indentation
+A source file is a hierarchy: the file, the classes in it, the methods in each class, the blocks in each 
+method. Indent each level so the hierarchy is visible:
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 19
+
+--- PAGE 20 ---
+ΓÇó Top-level declarations, such as most class declarations, are not indented.
+ΓÇó Members of a class are indented one level to the right of the class.
+ΓÇó Method bodies are indented one level to the right of the method declaration.
+ΓÇó Each block is indented one level to the right of the block that contains it.
+Note: Before a project starts, the team agrees the indentation width and enforces it with the IDE 
+formatter. Where no agreement exists, follow the Google Java Style Guide (two spaces per level; this 
+handbook's examples use four for print readability).
+B A D
+public class CheckoutServer implements SocketServer { private final CheckoutContext context; 
+public CheckoutServer(CheckoutContext context) { this.context = context; } public void 
+serve(Socket socket) { serve(socket, 10_000); } public void serve(Socket socket, long 
+timeoutMillis) { try { new RequestHandler(socket, context, timeoutMillis).start(); } catch 
+(IOException e) { throw new UncheckedIOException(e); } } }
+G O O D
+public class CheckoutServer implements SocketServer {
+    private final CheckoutContext context;
+ 
+    public CheckoutServer(CheckoutContext context) {
+        this.context = context;
+    }
+ 
+    public void serve(Socket socket) {
+        serve(socket, 10_000);
+    }
+ 
+    public void serve(Socket socket, long timeoutMillis) {
+        try {
+            new RequestHandler(socket, context, timeoutMillis).start();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 20
+
+--- PAGE 21 ---
+8. Objects and Data Structures
+AmaliTech engineers are required to follow these guidelines:
+ΓÇó Hide internal structure. Keep fields private and expose behaviour, not data.
+ΓÇó Use plain data carriers (in Java, records) for data that has no behaviour of its own.
+ΓÇó Avoid hybrids: a class that is half object (behaviour) and half data structure (public fields or 
+getters and setters for everything).
+ΓÇó Classes should be small and do one thing.
+ΓÇó Keep the number of instance variables small.
+ΓÇó A base class should know nothing about its subclasses.
+ΓÇó Prefer several methods to one method that is told, through a parameter, which behaviour to 
+select.
+ΓÇó Prefer instance methods to static methods, so behaviour can be replaced and tested.
+B A D
+class Membership {
+    public LocalDate startDate;
+    public int months;
+    public boolean frozen;
+}
+ 
+class MembershipChecker {
+    static boolean isActive(Membership membership, LocalDate today) {
+        return !membership.frozen
+                && !today.isAfter(membership.startDate.plusMonths(membership.months));
+    }
+}
+G O O D
+final class Membership {
+    private final LocalDate startDate;
+    private final Period length;
+    private boolean frozen;
+ 
+    Membership(LocalDate startDate, Period length) {
+        this.startDate = startDate;
+        this.length = length;
+    }
+ 
+    boolean isActiveOn(LocalDate date) {
+        return !frozen && !date.isAfter(startDate.plus(length));
+    }
+ 
+    void freeze() {
+        frozen = true;
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 21
+
+--- PAGE 22 ---
+9. Test-Driven Development
+Testing is central to how we deliver. Without enough tests, every deployment is a guess that nothing 
+has broken.
+AmaliTech requires 100% coverage of statements and branches. This is how we reach high 
+confidence and developer peace of mind.
+Changed in this edition: Coverage shows which code ran during the tests, not whether the tests 
+checked the result. A test with no meaningful assertion still counts towards coverage. Every test must 
+make an assertion that would fail if the behaviour it covers were wrong; a suite that reaches 100% 
+without such assertions does not meet this standard. Mutation testing (for example PIT) is a practical 
+way to check this.
+In addition to coverage, tests must be:
+ΓÇó Clean: quick and dirty is not accepted at AmaliTech.
+ΓÇó Readable: a test that is hard to read is not acceptable.
+ΓÇó Clear: it states what it is testing, in its name.
+ΓÇó Simple.
+ΓÇó Independent of every other test.
+ΓÇó Fast.
+ΓÇó Repeatable: the same result every time, in any environment.
+As part of our principle of simplicity, AmaliTech follows "a single concept per test". Several 
+assertions about the same behaviour are fine (JUnit 5's assertAll groups them); testing several 
+behaviours in one test is not.
+B A D
+class DateShifterTest {
+    @Test
+    void handlesDateBoundaries() {
+        assertEquals(LocalDate.of(2015, 1, 31),
+                DateShifter.addDays(LocalDate.of(2015, 1, 1), 30));
+        assertEquals(LocalDate.of(2016, 2, 29),
+                DateShifter.addDays(LocalDate.of(2016, 2, 1), 28));
+        assertEquals(LocalDate.of(2015, 3, 1),
+                DateShifter.addDays(LocalDate.of(2015, 2, 1), 28));
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 22
+
+--- PAGE 23 ---
+G O O D
+class DateShifterTest {
+    @Test
+    void handlesThirtyOneDayMonths() {
+        assertEquals(LocalDate.of(2015, 1, 31),
+                DateShifter.addDays(LocalDate.of(2015, 1, 1), 30));
+    }
+ 
+    @Test
+    void handlesLeapYears() {
+        assertEquals(LocalDate.of(2016, 2, 29),
+                DateShifter.addDays(LocalDate.of(2016, 2, 1), 28));
+    }
+ 
+    @Test
+    void handlesNonLeapYears() {
+        assertEquals(LocalDate.of(2015, 3, 1),
+                DateShifter.addDays(LocalDate.of(2015, 2, 1), 28));
+    }
+}
+Note: Before a project begins, the testers and the project team document the testing methodology, 
+covering manual, unit, integration and regression testing, and the tools to be used. The agreed 
+methodology must be followed throughout the project.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 23
+
+--- PAGE 24 ---
+10. Commenting
+10.1. Only comment things that have business logic complexity
+Comments are an apology, not a requirement. Good code mostly documents itself. Comment the 
+why that the code cannot express: a business rule, a non-obvious decision, a workaround and its 
+reason. Javadoc on public classes and methods describes the contract and is not covered by this 
+rule.
+B A D
+class Checksum {
+    static int of(String data) {
+        // the hash
+        int hash = 0;
+        // loop through every character
+        for (int i = 0; i < data.length(); i++) {
+            // get the character
+            char c = data.charAt(i);
+            // make the hash
+            hash = (hash << 5) - hash + c;
+        }
+        // return it
+        return hash;
+    }
+}
+G O O D
+class Checksum {
+    static int of(String data) {
+        int hash = 0;
+        for (int i = 0; i < data.length(); i++) {
+            // same as hash * 31 + c, matching the partner system's checksum
+            hash = (hash << 5) - hash + data.charAt(i);
+        }
+        return hash;
+    }
+}
+10.2. Do not keep journal comments or commented-out code
+AmaliTech engineers use version control to track history. Dead code, commented-out code and 
+journal comments are not accepted. Use git log to see the history.
+B A D
+/**
+ * 2016-12-20: removed caching, did not understand it (rm)
+ * 2016-10-01: improved with caching (jp)
+ * 2016-02-03: removed type checking (li)
+ */
+class Combiner {
+    int combine(int a, int b) {
+        // return cache.computeIfAbsent(a, k -> a + b);
+        return a + b;
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 24
+
+--- PAGE 25 ---
+G O O D
+class Combiner {
+    int combine(int a, int b) {
+        return a + b;
+    }
+}
+10.3. Avoid positional markers
+Banners and positional markers add noise. Let the method and variable names, with proper 
+indentation and formatting, give the code its visual structure.
+B A D
+class Dashboard {
+    ////////////////////////////////////////////////////////////
+    // Model
+    ////////////////////////////////////////////////////////////
+    private final Map<String, String> model = Map.of("menu", "foo", "nav", "bar");
+ 
+    ////////////////////////////////////////////////////////////
+    // Actions
+    ////////////////////////////////////////////////////////////
+    void refresh() {
+    }
+}
+G O O D
+class Dashboard {
+    private final Map<String, String> model = Map.of("menu", "foo", "nav", "bar");
+ 
+    void refresh() {
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 25
+
+--- PAGE 26 ---
+11. Source Code Structure
+Our source files must be structured according to these guidelines:
+ΓÇó Separate concepts vertically.
+ΓÇó Related code should appear vertically dense.
+ΓÇó Declare variables close to their use.
+ΓÇó Keep dependent methods close.
+ΓÇó Keep similar methods close.
+ΓÇó Order methods downwards: callers above callees.
+ΓÇó Keep lines short.
+ΓÇó Do not use horizontal alignment.
+ΓÇó Use white space to associate related things and separate weakly related ones.
+ΓÇó Do not break indentation.
+11.1. Java source files
+Changed in this edition. The 2022 standard did not cover Java-specific source file rules. AmaliTech 
+adopts the Google Java Style Guide for them; the main points are:
+ΓÇó One top-level class per file, named after the class.
+ΓÇó File order: licence (if any), package statement, imports, then the class.
+ΓÇó Package names as in ┬º3.5: lower case, reversed domain, no underscores. Organise packages 
+by feature or by layer as the project team agrees, and keep to the choice.
+ΓÇó No wildcard imports. Static imports and other imports in two separate blocks, each in ASCII 
+order.
+ΓÇó Braces are always used with if, else, for, do and while, even when the body is a single 
+statement. Opening braces go at the end of the line.
+ΓÇó A column limit of 100 characters.
+ΓÇó One variable per declaration.
+B A D
+import java.util.*;
+ 
+class SeatFinder {
+    int free(List<Seat> seats) {
+        int count = 0, row = 0;
+        for (Seat seat : seats) if (!seat.isTaken()) count++;
+        return count;
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 26
+
+--- PAGE 27 ---
+G O O D
+import java.util.List;
+ 
+class SeatFinder {
+    int countFree(List<Seat> seats) {
+        int freeSeats = 0;
+        for (Seat seat : seats) {
+            if (!seat.isTaken()) {
+                freeSeats++;
+            }
+        }
+        return freeSeats;
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 27
+
+--- PAGE 28 ---
+12. The SOLID Principles
+SOLID, as described by Robert C. Martin:
+ΓÇó S: Single-responsibility principle
+ΓÇó O: Open-closed principle
+ΓÇó L: Liskov substitution principle
+ΓÇó I: Interface segregation principle
+ΓÇó D: Dependency inversion principle
+These principles lead to software that is easier to maintain and extend as a project grows, and help 
+to avoid code smells. AmaliTech strongly encourages its engineers to follow them.
+12.1. Single-responsibility principle (SRP)
+A class should have one, and only one, reason to change: it should have one job.
+B A D
+class UserSettings {
+    private final User user;
+ 
+    UserSettings(User user) {
+        this.user = user;
+    }
+ 
+    void changeSettings(Settings settings) {
+        if (verifyCredentials()) {
+            user.apply(settings);
+        }
+    }
+ 
+    private boolean verifyCredentials() {
+        return user.hasValidSession() && !user.isLocked();
+    }
+}
+G O O D
+class UserAuth {
+    boolean verifyCredentials(User user) {
+        return user.hasValidSession() && !user.isLocked();
+    }
+}
+ 
+class UserSettings {
+    private final User user;
+    private final UserAuth auth;
+ 
+    UserSettings(User user, UserAuth auth) {
+        this.user = user;
+        this.auth = auth;
+    }
+ 
+    void changeSettings(Settings settings) {
+        if (auth.verifyCredentials(user)) {
+            user.apply(settings);
+        }
+    }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 28
+
+--- PAGE 29 ---
+12.2. Open-closed principle (OCP)
+Software entities (classes, modules, methods) should be open for extension but closed for 
+modification: you can add new behaviour without changing code that already works.
+B A D
+class RegistrationValidator {
+    List<String> validate(Registration registration) {
+        List<String> problems = new ArrayList<>();
+        if (registration.email() == null || !registration.email().contains("@")) {
+            problems.add("A valid email address is required");
+        }
+        if (registration.age() < 16) {
+            problems.add("Members must be at least 16");
+        }
+        // every new rule means editing this method
+        return problems;
+    }
+}
+G O O D
+interface RegistrationRule {
+    Optional<String> check(Registration registration);
+}
+ 
+class RegistrationValidator {
+    private final List<RegistrationRule> rules;
+ 
+    RegistrationValidator(List<RegistrationRule> rules) {
+        this.rules = List.copyOf(rules);
+    }
+ 
+    List<String> validate(Registration registration) {
+        return rules.stream()
+                .map(rule -> rule.check(registration))
+                .flatMap(Optional::stream)
+                .toList();
+    }
+}
+ 
+class MinimumAgeRule implements RegistrationRule {
+    private static final int MINIMUM_AGE = 16;
+ 
+    public Optional<String> check(Registration registration) {
+        return registration.age() < MINIMUM_AGE
+                ? Optional.of("Members must be at least " + MINIMUM_AGE)
+                : Optional.empty();
+    }
+}
+A new rule is a new class passed to the validator; RegistrationValidator itself does not change.
+12.3. Liskov substitution principle (LSP)
+Every subclass must be usable wherever its parent class is expected, without the caller noticing a 
+difference.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 29
+
+--- PAGE 30 ---
+B A D
+class Rectangle {
+    protected int width;
+    protected int height;
+ 
+    void setWidth(int width) { this.width = width; }
+    void setHeight(int height) { this.height = height; }
+    int area() { return width * height; }
+}
+ 
+class Square extends Rectangle {
+    @Override void setWidth(int width) { this.width = width; this.height = width; }
+    @Override void setHeight(int height) { this.width = height; this.height = height; }
+}
+ 
+class Renderer {
+    int areaOfFourByFive(Rectangle rectangle) {
+        rectangle.setWidth(4);
+        rectangle.setHeight(5);
+        return rectangle.area(); // 25 for a Square, not 20
+    }
+}
+G O O D
+sealed interface Shape permits Rectangle, Square {
+    int area();
+}
+ 
+record Rectangle(int width, int height) implements Shape {
+    public int area() { return width * height; }
+}
+ 
+record Square(int side) implements Shape {
+    public int area() { return side * side; }
+}
+Square no longer pretends to be a Rectangle with different rules. Both are Shapes, and any code 
+that works with a Shape works with either.
+Note: This example puts several short members on one line to fit the page; in production code, follow 
+┬º7 and ┬º11.1.
+12.4. Interface segregation principle (ISP)
+A client should never be forced to implement an interface it does not use, or to depend on methods 
+it does not need.
+B A D
+interface Device {
+    void print(Document document);
+    void scan(Document document);
+    void fax(Document document);
+}
+ 
+class BasicPrinter implements Device {
+    public void print(Document document) { /* prints */ }
+    public void scan(Document document) { throw new UnsupportedOperationException(); }
+    public void fax(Document document) { throw new UnsupportedOperationException(); }
+}
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 30
+
+--- PAGE 31 ---
+G O O D
+interface Printer {
+    void print(Document document);
+}
+ 
+interface Scanner {
+    void scan(Document document);
+}
+ 
+class BasicPrinter implements Printer {
+    public void print(Document document) { /* prints */ }
+}
+ 
+class OfficeMachine implements Printer, Scanner {
+    public void print(Document document) { /* prints */ }
+    public void scan(Document document) { /* scans */ }
+}
+12.5. Dependency inversion principle (DIP)
+Depend on abstractions, not on concrete classes. High-level modules should not depend on low-
+level modules; both should depend on abstractions.
+B A D
+class InventoryTracker {
+    // hard-wired to one implementation
+    private final HttpInventoryRequester requester = new HttpInventoryRequester();
+ 
+    void requestItems(List<String> items) {
+        items.forEach(requester::requestItem);
+    }
+}
+G O O D
+interface InventoryRequester {
+    void requestItem(String item);
+}
+ 
+class InventoryTracker {
+    private final InventoryRequester requester;
+ 
+    InventoryTracker(InventoryRequester requester) {
+        this.requester = requester;
+    }
+ 
+    void requestItems(List<String> items) {
+        items.forEach(requester::requestItem);
+    }
+}
+ 
+// The caller chooses the implementation:
+// new InventoryTracker(new WebSocketInventoryRequester())
+Because the dependency is passed in, the tracker can use an HTTP requester, a WebSocket 
+requester or, in a test, a fake, without any change to its code.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 31
+
+--- PAGE 32 ---
+13. Team Responsibility
+Implementing these principles, and making sure all AmaliTech code meets the highest standard of 
+industry practice, is the collective responsibility of each project team. Everyone holds everyone else 
+accountable.
+For every iteration of tasks, tickets or issues, the team holds peer code reviews to check the work, 
+identify problems and suggest improvements against this standard.
+Project team leads act as the quality reviewer before a final pull request is merged.
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 32
+
+--- PAGE 33 ---
+14. Conclusion
+Writing clean code takes effort, and it is worth it. Clean code is integral to the success of our 
+projects.
+Perfect code is not always possible, but we always try to write code as cleanly as we can. 
+Programming is a craft, and we encourage our engineers to practise it to the full. Let other 
+programmers enjoy your code.
+Following this standard keeps code clear and easy to work on together. Standards vary with the 
+application, the industry, the project and the team, but the conventions in this handbook help our 
+developers and testers work smoothly and avoid unnecessary rework.
+To close, a quote from Robert C. Martin: "Most managers may defend the schedule and 
+requirements with passion; but that's their job. It's your job to defend the code with equal passion."
+AmaliTech Coding Standards ┬╖ Java Edition ┬╖ page 33
+
